@@ -1,0 +1,19 @@
+# StorageClass 的作用，是自动地为集群里存在的每一个 PVC，
+# 调用存储插件（Rook）创建对应的 PV，从而省去了我们手动创建 PV 的机械劳动。
+apiVersion: ceph.rook.io/v1beta1
+kind: Pool
+metadata:
+  name: replicapool
+  namespace: rook-ceph
+spec:
+  replicated:
+    size: 3
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: rook-ceph-block
+provisioner: ceph.rook.io/block
+parameters:
+  pool: replicapool
+  clusterNamespace: rook-ceph
