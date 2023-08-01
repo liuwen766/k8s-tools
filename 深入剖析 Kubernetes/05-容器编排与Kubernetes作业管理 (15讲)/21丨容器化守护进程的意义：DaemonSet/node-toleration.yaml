@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-toleration
+spec:
+  tolerations:
+    - key: node-role.kubernetes.io/master  # 保证master节点也可以调度
+      effect: NoSchedule
+    - key: node.kubernetes.io/unschedulable  # 保证即使是unschedulable节点也可以调度
+      operator: Exists
+      effect: NoSchedule
+---
+# 在 Kubernetes 项目中，当一个节点的网络插件尚未安装时，这个节点就会被自动加上名为node.kubernetes.io/network-unavailable的“污点”。
+# 因此DaemonSet管理的网络插件的 Agent Pod会自动加上这个Toleration，如下：
+# 通过这样一个 Toleration，调度器在调度这个 Pod 的时候，就会忽略当前节点上的“污点”，
+# 从而成功地将网络插件的 Agent 组件调度到这台机器上启动起来。
+...
+template:
+  metadata:
+    labels:
+      name: network-plugin-agent
+  spec:
+    tolerations:
+      - key: node.kubernetes.io/network-unavailable
+        operator: Exists
+        effect: NoSchedule

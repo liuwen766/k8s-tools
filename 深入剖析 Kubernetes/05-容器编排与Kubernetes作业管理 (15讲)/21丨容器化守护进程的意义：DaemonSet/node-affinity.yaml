@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-node-affinity
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:   # 每次调度的时候予以考虑
+        nodeSelectorTerms:
+          - matchExpressions:       # 只允许运行在“metadata.name”是“node-geektime”的节点
+              - key: metadata.name
+                operator: In        # 支持丰富的语法 operator: Equal/In等等，这也正是 nodeAffinity 会取代 nodeSelector 的原因之一。
+                values:
+                  - node-geektime
