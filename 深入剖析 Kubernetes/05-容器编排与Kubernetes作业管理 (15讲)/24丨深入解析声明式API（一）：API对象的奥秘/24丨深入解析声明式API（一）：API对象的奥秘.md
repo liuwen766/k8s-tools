@@ -5,6 +5,7 @@
 
 - 在 Kubernetes 项目中，一个 API 对象在 Etcd 里的完整资源路径，是由：Group（API 组）、Version（API 版本）和 Resource（API
   资源类型）三个部分组成的。
+  ![img.png](img.png)
 
 - k8s拿到一个yaml文件，是如何对 Resource、Group 和 Version 进行解析，从而在 Kubernetes 项目里找到 对应
   对象[eg:pod、deploy、cronjob等]的定义呢？以“apiVersion: batch/v2alpha1 kind: CronJob”为例
