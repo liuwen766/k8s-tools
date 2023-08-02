@@ -1,0 +1,18 @@
+# 先定义 CRD（Custom Resource Definition）
+# 有了这个CRD，Kubernetes 就能够认识和处理所有声明了 API 类型是“samplecrd.k8s.io/v1/network”的 YAML 文件
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: networks.samplecrd.k8s.io
+spec:
+  #  分组
+  group: samplecrd.k8s.io
+  #  版本信息
+  version: v1
+  names:
+    #    资源类型
+    kind: Network
+    #    复数形式   用于 ks get networks
+    plural: networks
+  # 定义的这个 Network 是一个属于 Namespace 的对象，类似于 Pod。
+  scope: Namespaced

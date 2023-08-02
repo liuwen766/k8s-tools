@@ -1,0 +1,9 @@
+# 一个具体的“自定义 API 资源”实例，即CR（Custom Resource），它由CRI定义
+apiVersion: samplecrd.k8s.io/v1
+kind: Network
+metadata:
+  name: example-network
+# 通过代码工作，让K8s认识以下字段
+spec:
+  cidr: "192.168.0.0/16"
+  gateway: "192.168.0.1"
