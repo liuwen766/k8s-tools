@@ -1,0 +1,14 @@
+apiVersion: admissionregistration.k8s.io/v1alpha1
+kind: InitializerConfiguration
+metadata:
+  name: envoy-config
+initializers:
+  #   这个名字必须至少包括两个 "." ，指定了负责这个操作的 Initializer
+  - name: envoy.initializer.kubernetes.io
+    rules:
+      - apiGroups:
+          - "" // 前面说过， "" 就是 core API Group 的意思
+        apiVersions:
+          - v1
+        resources:
+          - pods
