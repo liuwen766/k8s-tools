@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi
+spec:
+  # Job并行控制
+  parallelism: 2  # Job 最大的并行数是 2 [默认值1] 同时运行两个pod
+  completions: 4  # Job 最小的完成数是 4 [默认值1] 总共需要完成运行4个pod
+  template: # Pod 模板
+    spec:
+      containers:
+        - name: pi
+          image: resouer/ubuntu-bc
+          #  计算出π值 后面10000位
+          command: [ "sh", "-c", "echo 'scale=10000; 4*a(1)' | bc -l " ]
+      #restartPolicy 在 Job 对象里只允许被设置为 Never 和 OnFailure；而在 Deployment 对象里，restartPolicy 则只允许被设置为 Always。
+      # Never 表示离线作业失败后 Job Controller 就会不断地尝试创建一个新 Pod
+      # OnFailure 表示离线作业失败后 Job Controller 就会不断地尝试重启 Pod 里的容器
+      restartPolicy: Never
+  backoffLimit: 4  # 失败重试次数为 4
+  # 最长运行时间 100s  一旦超过100s，则 Pod 的状态里看到终止的原因是 reason: DeadlineExceeded
+  activeDeadlineSeconds: 100
+
