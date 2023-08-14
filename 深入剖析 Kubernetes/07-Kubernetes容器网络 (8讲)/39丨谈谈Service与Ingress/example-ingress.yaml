@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: cafe-ingress
+spec:
+  tls:
+    - hosts:
+        - cafe.example.com
+      secretName: cafe-secret
+  rules: # IngressRule
+    - host: cafe.example.com  # Ingress 的入口
+      http:
+        paths:
+          - path: /tea   # 简单地理解为，这里的每一个 path 都对应一个后端 Service。
+            backend:
+              serviceName: tea-svc
+              servicePort: 80
+          - path: /coffee
+            backend:
+              serviceName: coffee-svc
+              servicePort: 80
