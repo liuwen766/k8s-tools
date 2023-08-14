@@ -6,11 +6,11 @@
 - Service 是由 kube-proxy 组件，加上 iptables 来共同实现的。
 
 - iptables 模式的工作原理：
--
-- 举个例子，对于我们前面创建的名叫 hostnames 的 Service 来说，一旦它被提交给 Kubernetes，那么 kube-proxy 就可以通过 Service
-  的 Informer 感知到这样一个 Service 对象的添加。而作为对这个事件的响应，它就会在宿主机上创建这样一条 iptables 规则（你可以通过
-  iptables-save 看到它），这条 iptables 规则的含义是：凡是目的地址是 10.0.1.175、目的端口是 80 的 IP 包，都应该跳转到另外一条名叫
-  KUBE-SVC-NWV5X2332I4OT4T3的 iptables 链【它是一组规则的集合：指向的最终目的地pod的DNAT规则链，用于Service
+
+- 举个例子，对于我们前面创建的名叫 hostnames 【example-svc.yaml】的 Service 来说，一旦它被提交给 Kubernetes，那么 kube-proxy
+  就可以通过 Service 的 Informer 感知到这样一个 Service 对象的添加。而作为对这个事件的响应，它就会在宿主机上创建这样一条
+  iptables 规则（可以通过 iptables-save 看到它），这条 iptables 规则的含义是：凡是目的地址是 10.0.1.175、目的端口是 80 的 IP
+  包，都应该跳转到另外一条名叫 KUBE-SVC-NWV5X2332I4OT4T3的 iptables 链【它是一组规则的集合：指向的最终目的地pod的DNAT规则链，用于Service
   实现负载均衡。】进行处理。如下所示：
 
 ```shell
@@ -58,6 +58,8 @@
   iptables规则，而是把对这些“规则”的处理放到了内核态，从而极大地降低了维护这些规则的代价。
 - 在大规模集群里，非常建议为 kube-proxy 设置–proxy-mode=ipvs 来开启这个功能。它为 Kubernetes 集群规模带来的提升，还是非常巨大的。
 
+
+- DNS——Service 与 DNS 的关系:
 
 - 在 Kubernetes 中，Service 和 Pod 都会被分配对应的 DNS A 记录（从域名解析 IP 的记录）。
 - 对于 ClusterIP 模式【ClusterIP 模式的 Service 提供的，就是一个 Pod 的稳定的 IP 地址，即 VIP】的 Service 来说，它代理的

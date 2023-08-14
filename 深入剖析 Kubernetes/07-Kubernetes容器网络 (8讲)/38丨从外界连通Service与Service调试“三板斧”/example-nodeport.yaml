@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-nginx
+  labels:
+    run: my-nginx
+spec:
+  type: NodePort
+  ports:
+    - nodePort: 8080    # 如果你不显式地声明 nodePort 字段，则随机分配：kube-apiserver 的 –service-node-port-range——端口的范围默认是 30000-32767
+      targetPort: 80
+      protocol: TCP
+      name: http
+    - nodePort: 443
+      protocol: TCP
+      name: https
+  selector:
+    run: my-nginx
