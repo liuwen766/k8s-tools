@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web
+spec:
+  serviceName: "nginx"
+#  serviceName这个字段告诉 StatefulSet 控制器，在执行控制循环（Control Loop）的时候，
+#  请使用 nginx 这个 Headless Service 来保证 Pod 的“可解析身份”
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.9.1
+          ports:
+            - containerPort: 80
+              name: web
