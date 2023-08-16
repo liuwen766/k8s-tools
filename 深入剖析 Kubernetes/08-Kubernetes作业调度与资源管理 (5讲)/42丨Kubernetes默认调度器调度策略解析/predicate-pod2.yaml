@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: with-pod-affinity
+spec:
+  affinity:
+    podAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+              - key: security
+                operator: In
+                values:
+                  - S1
+          topologyKey: failure-domain.beta.kubernetes.io/zone
+  containers:
+    - name: with-pod-affinity
+      image: docker.io/ocpqe/hello-pod
+#      podAffinity规则：Pod，就只会被调度到已经有携带了 security=S1 标签的 Pod 运行的 Node 上
