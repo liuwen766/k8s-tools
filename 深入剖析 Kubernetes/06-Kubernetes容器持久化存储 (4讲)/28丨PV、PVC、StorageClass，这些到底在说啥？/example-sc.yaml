@@ -1,0 +1,32 @@
+# 自动创建 PV 的机制，即：Dynamic Provisioning。
+---
+apiVersion: ceph.rook.io/v1beta1
+kind: Pool
+metadata:
+  name: replicapool
+  namespace: rook-ceph
+spec:
+  replicated:
+    size: 3
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: block-service    # 定义了一个名叫 block-service 的 StorageClass。
+provisioner: ceph.rook.io/block   # Kubernetes 内置的 GCE PD 存储插件的名字
+parameters: # PV 的参数
+  pool: replicapool
+  #The value of "clusterNamespace" MUST be the same as the one in which your rook cluster exist
+  clusterNamespace: rook-ceph
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: claim1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: block-service
+  resources:
+    requests:
+      storage: 30Gi
