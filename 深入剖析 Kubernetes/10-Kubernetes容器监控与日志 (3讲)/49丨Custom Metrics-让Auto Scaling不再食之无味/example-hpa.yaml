@@ -1,0 +1,19 @@
+kind: HorizontalPodAutoscaler
+apiVersion: autoscaling/v2beta1
+metadata:
+  name: sample-metrics-app-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: sample-metrics-app  # 指定了被监控的对象是名叫 sample-metrics-app
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:           # 获取这个 Metrics 的途径，则是访问名叫 sample-metrics-app 的 Service
+    - type: Object
+      object:
+        target:
+          kind: Service  # 对于一个多实例应用来说，通过 Service 来采集 Pod 的 Custom Metrics 其实才是合理的做法。
+          name: sample-metrics-app
+        metricName: http_requests
+        targetValue: 100
