@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  shareProcessNamespace: true   # 这个 Pod 里的容器要共享 PID Namespace
+  containers:
+    - name: nginx
+      image: nginx
+    - name: shell
+      image: busybox
+      stdin: true
+      tty: true

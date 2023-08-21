@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  hostNetwork: true  # 直接使用宿主机的网络
+  hostIPC: true  # 直接与宿主机进行 IPC 通信
+  hostPID: true # 看到宿主机里正在运行的所有进程
+  containers:
+    - name: nginx
+      image: nginx
+    - name: shell
+      image: busybox
+      stdin: true
+      tty: true

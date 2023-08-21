@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: lifecycle-demo
+spec:
+  containers:
+    - name: lifecycle-demo-container
+      image: nginx
+      lifecycle:
+        postStart: # 在容器启动后，立刻执行一个指定的操作
+          exec:
+            command: [ "/bin/sh", "-c", "echo Hello from the postStart handler > /usr/share/message" ]
+        preStop:  # 容器被杀死之前, 调用了 nginx 的退出指令，实现了容器的“优雅退出”
+          exec:
+            command: [ "/usr/sbin/nginx","-s","quit" ]
