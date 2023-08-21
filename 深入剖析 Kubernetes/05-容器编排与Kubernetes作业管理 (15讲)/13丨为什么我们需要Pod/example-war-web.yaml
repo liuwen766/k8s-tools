@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: javaweb-2
+spec:
+  initContainers:
+    - image: geektime/sample:v2         # 一个 WAR 包
+      name: war
+      command: [ "cp", "/sample.war", "/app" ]
+      volumeMounts:
+        - mountPath: /app
+          name: app-volume
+  containers:
+    - image: geektime/tomcat:7.0       # 一个标准的 Tomcat 镜像
+      name: tomcat
+      command: [ "sh","-c","/root/apache-tomcat-7.0.42-v2/bin/start.sh" ]
+      volumeMounts:
+        - mountPath: /root/apache-tomcat-7.0.42-v2/webapps
+          name: app-volume
+      ports:
+        - containerPort: 8080
+          hostPort: 8001
+  volumes:
+    - name: app-volume
+      emptyDir: { }
+# WAR 包容器的类型是一个 Init Container。在 Pod 中，所有
+#  Init Container 定义的容器，都会比 spec.containers 定义的用户容器先启动。并且，Init Container
+#  容器会按顺序逐一启动，而直到它们都启动并且退出了，用户容器才会启动。
+# 所以，等 Tomcat 容器启动时，它的 webapps 目录下就一定会存在 sample.war 文件：这个文件正是 WAR 包容器启动时拷贝到这个
+#  Volume 里面的，而这个 Volume 是被这两个容器共享的。
