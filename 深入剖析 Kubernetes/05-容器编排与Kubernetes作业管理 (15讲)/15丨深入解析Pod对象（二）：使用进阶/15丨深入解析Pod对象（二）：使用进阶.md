@@ -49,4 +49,26 @@ zone="us-est-coast"
   Token，才可以合法地访问 API Server。
 
 
-- Pod 的另一个重要的配置：容器健康检查和恢复机制。如
+- Pod 的另一个重要的配置：容器健康检查和恢复机制。eg：example-liveness.yaml
+- Kubernetes 里的Pod 恢复机制，也叫 restartPolicy。它是 Pod 的 Spec 部分的一个标准字段（pod.spec.restartPolicy），默认值是
+  Always，即：任何时候这个容器发生了异常，它一定会被重新创建。
+- Always：在任何情况下，只要容器不在运行状态，就自动重启容器；
+  OnFailure: 只在容器 异常时才自动重启容器；
+  Never: 从来不重启容器。
+- Pod 的恢复过程，永远都是发生在当前节点上，而不会跑到别的节点上去。事实上，一旦一个 Pod
+  与一个节点（Node）绑定，除非这个绑定发生了变化（pod.spec.node 字段被修改），否则它永远都不会离开这个节点。这也就意味着，如果这个宿主机宕机了，这个
+  Pod 也不会主动迁移到其他节点上去。
+
+- 只要 Pod 的 restartPolicy 指定的策略允许重启异常的容器（比如：Always），那么这个 Pod 就会保持 Running 状态，并进行容器重启。否则，Pod
+  就会进入 Failed 状态 。
+- 对于包含多个容器的 Pod，只有它里面所有的容器都进入异常状态后，Pod 才会进入 Failed 状态。在此之前，Pod 都是 Running
+  状态。此时，Pod的 READY 字段会显示正常容器的个数。
+
+
+- 可以定义一个 PodPreset 对象。在这个对象中，凡是想在开发人员编写的 Pod 里追加的字段，都可以预先定义好。 PodPreset 是专门用来对
+  Pod 进行批量化、自动化修改的工具对象。
+  PodPreset里定义的内容，只会在 Pod API 对象被创建之前追加在这个对象本身上，而不会影响任何 Pod 的控制器的定义。
+- 比如，现在提交的是一个 nginx-deployment，那么这个 Deployment 对象本身是永远不会被 PodPreset 改变的，被修改的只是这个
+  Deployment 创建出来的所有 Pod。
+- 如果定义了同时作用于一个 Pod 对象的多个 PodPreset，会发生什么呢？ 实际上，Kubernetes 项目会合并（Merge）这两个
+  PodPreset 要做的修改。而如果它们要做的修改有冲突的话，这些冲突字段就不会被修改。
