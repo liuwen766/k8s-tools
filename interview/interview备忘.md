@@ -31,10 +31,10 @@
 - 个人：
 - 家庭：
 
-# 四、工作过程中遇到最大的挑战是什么？
+# 四、工作过程中遇到过哪些问题？最大的挑战是什么？
 
-- 短时间内完成重大产品MySQL的上线变更。
-- RwMutex死锁问题排查
+- RwMutex死锁问题排查：https://blog.csdn.net/qq_41822345/article/details/125907670
+- 批量插入数据优化：https://mp.weixin.qq.com/s/-r8NxSuTprK2eS5vyjn31A
 
 # 五、项目中核心困难？怎么解决的？
 
