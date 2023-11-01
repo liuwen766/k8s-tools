@@ -7,6 +7,8 @@ $ git clone https://github.com/coreos/etcd-operator
 
 - 第二步，将这个 Etcd Operator 部署在 Kubernetes 集群里。
 
+
+
 1、先为 Etcd Operator 创建 RBAC 规则：
 
 ```shell
@@ -25,5 +27,6 @@ $ kubectl create -f example/deployment.yaml
 $ kubectl apply -f example/example-etcd-cluster.yaml
 ```
 
-- Operator 的工作原理，实际上是利用了 Kubernetes 的自定义 API 资源（CRD），来描述我们想要部署的“有状态应用”；然后在自定义控制器里，根据自定义
-  API 对象的变化，来完成具体的部署和运维工作。
+
+
+- **Operator 的工作原理，实际上是利用了 Kubernetes 的自定义 API 资源（CRD），来描述我们想要部署的“有状态应用”；然后在自定义控制器里，根据自定义API 对象的变化，来完成具体的部署和运维工作**。
