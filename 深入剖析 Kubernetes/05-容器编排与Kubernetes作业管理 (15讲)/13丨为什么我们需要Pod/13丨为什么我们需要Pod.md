@@ -56,6 +56,4 @@
   /var/log 目录上。sidecar 容器就只需要做一件事儿，那就是不断地从自己的 /var/log 目录里读取日志文件，转发到 MongoDB 或者
   Elasticsearch 中存储起来。最基本的日志收集工作就完成了。
 
-- 除了共享 Volume，Pod 的另一个重要特性是，它的所有容器都共享同一个 Network Namespace。这就使得很多与 Pod 网络相关的配置和管理，也都可以交给
-  sidecar 完成，而完全无须干涉用户容器。这里最典型的例子莫过于 Istio 这个微服务治理项目【Istio 项目使用 sidecar
-  容器完成微服务治理的原理】。
+- 除了共享 Volume，Pod 的另一个重要特性是，它的所有容器都共享同一个 Network Namespace。这就使得很多与 Pod 网络相关的配置和管理，也都可以交给sidecar 完成，而完全无须干涉用户容器。这里最典型的例子莫过于 Istio 这个微服务治理项目【Istio 项目使用 sidecar容器完成微服务治理的原理】。
