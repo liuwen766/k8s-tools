@@ -25,6 +25,8 @@
 
 - 认证模块
 
+- 统一订购模块服务
+
 ## 3、为什么选择来我们公司？
 
 - 上海：
@@ -82,10 +84,20 @@
 # 二、Go语言
 
 ## 1、Java和Go语言对比，各有什么优缺点，各自适合做什么样的工作？
+- 1、Java是面向对象的语言，它的基本思想是使用对象、类、封装、继承、多态等基本概念来进行程序设计。Go里只有一个结构体，结构体之间通过组合的方式来复用字段属性或者方法。
+- 2、编译：Java先由JVM编译成字节码，再编译成机器码。而Go是直接编译为二进制文件。所有一般来说Go的性能和效率高于Java。
+> Java 是 JIT， Just-in-time,动态(即时)编译，边运行边编译；Go是AOT编译，AOT，Ahead Of Time，指运行前编译，预先编译。
+- 3、并发，Go语言在设计之初就考虑到了多核处理器，它提供了goroutine的轻量级线程，比Java的Thread更轻量，并发性能也更高些。
+- 4、生态：Java流行了20多年，它具有很广泛的生态。Go是后起之秀，基于云原生发展起来。
+- 5、异常处理：Java try-catch-finally；Go 一大堆err判断。defer结合panic/recover处理。
 
 
 ## 2、Java和Go在多线程编程上有什么区别？
 
+- Java 中 CPU 资源分配对象是 Thread，Go 中 CPU 资源分配对象是 goroutine。Java Thread 与系统线程为一一对应关系，goroutine 是 Go 实现的用户级线程，与系统线程是 m:n 关系。
+- Golang语言的goroutine是一种轻量级的线程，它们的创建和销毁速度比Java中的线程快得多。在Java中，创建和销毁线程都需要相当大的开销。
+- Golang语言采用了CSP的并发模型，它通过在并发实体之间进行消息传递来实现并发控制，其中以goroutine和channel作为主要实现手段。 Java则采用了多线程并发模型，其中以Thread和Synchronization作为主要实现手段。
+> Do not communicate by sharing memory; instead, share memory by communicating.
 
 # 三、Java语言
 
