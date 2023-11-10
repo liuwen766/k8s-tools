@@ -171,8 +171,26 @@ MySQL调优场景描述【从部署到上线】
 ## 5、说一说MySQL的B+树索引？
 
 ## 6、MySQL中有哪些锁？它们有哪些优缺点？
+参考链接：https://zhuanlan.zhihu.com/p/636972366
 
 ## 7、MySQL在什么场景下会加间隙锁？
+参考链接：https://zhuanlan.zhihu.com/p/636972366
+
+## 8、MySQL死锁问题？如何查看？如何解决？
+```shell
+#查看死锁：
+show engine innodb status\G
+#解除死锁方法：
+#方法一：
+show OPEN TABLES where in_use > 0;
+show processlist;
+#3.kill id;
+#方法二：
+SELECT * FROM INFORMATION_SCHEMA.INNODB_TRX;
+SELECT * FROM INFORMATION_SCHEMA.INNODB_LOCKS;
+SELECT * FROM INFORMATION_SCHEMA.INNODB_LOCK_WAITS;
+kill PID;
+```
 
 ## 8、MySQL如何解决幻读的？
 
