@@ -1,10 +1,12 @@
 一定要准备好以下问题：
 
+@[TOC]
+
 # 一、综合篇
 
 ## 1、自我介绍
 
-**重在突出自己对当前面试岗位的匹配度。**
+**重在突出自己对当前面试岗位的匹配度。**【面试就是在十几分钟内跟面试官推销自己的过程】
 
 - 2020年硕士毕业于南京邮电大学，之后一直在中国移动软件技术有限公司工作。
 - 因为个人家庭原因，目前在找一份工作地点位于上海的工作。最近看到贵公司在招GO开发工程师，本人也有意转到这个方向。希望日后有机会可以从事该方向的工作。
@@ -14,7 +16,19 @@
 - 我也积极参与分享，在CSDN上以博客方式分享自己的工作与学习经验，阅读量超20W+。
 - 近期关注到贵公司在招聘 XXX，我认为我和这个岗位比较契合，相比其它候选人，我认为我的优势在于 XX。
 
+
+
+
+- 面试自我介绍模板
+- 见目录：interview/interview文件存档/自我介绍模板.png
+
 ## 2、项目介绍。项目上有哪些是自己做的比较好的设计？优化？
+
+- 项目介绍思路：
+  - 1、项目立项时所处的背景
+  - 2、项目立项时业务所面临的困境
+  - 3、项目实施时所用到的综合技术方案
+  - 4、项目上线后所带来的的价值
 
 - 进销存系统
 
@@ -56,7 +70,12 @@
 
 ## 5、项目中核心困难？怎么解决的？
 
-- 发现问题→分析问题→提出方案→取得效果。
+- 回答思路：
+
+  - 发现问题
+  - 分析问题
+  - 提出方案
+  - 取得效果。
 
 - 案例一、Order访问元数据库超时问题排查——order连接mysql异常：i/o timeout 或者 invalid connection 报错。
   - 1、定时备份导致IO使用率高，引发连接异常。general-log定时归档导致IO使用率高。 
@@ -99,6 +118,14 @@
 - Golang语言采用了CSP的并发模型，它通过在并发实体之间进行消息传递来实现并发控制，其中以goroutine和channel作为主要实现手段。 Java则采用了多线程并发模型，其中以Thread和Synchronization作为主要实现手段。
 > Do not communicate by sharing memory; instead, share memory by communicating.
 
+## 3、GMP介绍下？
+
+
+
+## 4、GO的垃圾回收了解吗？
+
+
+
 # 三、Java语言
 
 
@@ -112,7 +139,7 @@ MySQL调优场景描述【从部署到上线】
 - 可以反问几个问题来确认需求：单主多从、16C64G1TB固态盘 
 - 答题思路：io线程+bufferpool+表空间文件+同步配置+binlog开启+表结构合理化+压测提高缓冲命中+binlog cache_size调整】
 - 1、首先，第一步在MySQL的安装部署阶段，进行参数调优【DBA运维】：
-    
+  
     - 参数1：IO线程[分为read_io和write_io线程]【MySQL后台有四个线程：Matser线程、IO线程、purge线程、page_cleaner线程】默认为4个，将其调到6个尽最大可能利用多核CPU；
     - 参数2：innodb_buffer_pool_size默认128M，预先调整为64G的25%，后面可以将其根据业务量的大小调整到64G的75%；
     - 参数3：innodb_buffer_pool_instance默认为1。可以调整为2或者4来作为缓冲池的个数，可以达到一个负载均衡的效果。
@@ -121,7 +148,7 @@ MySQL调优场景描述【从部署到上线】
     - 参数6：对于单主多从，binlog默认关闭，需要开启主的binlog。另外将事务隔离级别设置为rc，基于rbr模式进行主从复制，将lock_mod设置为2，以互斥量形式进行id的分发，提高插入性能。
     - 参数7：双一半同步设置：redolog的刷盘机制参数： innodb_flush_log_at_trx_commit为1——提交事务的时候将 redo 日志写入磁盘中（设置为1表示提交事务的时候，就必须把 redo log 从内存刷入到磁盘文件里去）；binlog的刷盘机制参数：sync_binlog —— 用来控制数据库的binlog刷到磁盘上（设置为1表示每次事务提交，MySQL都会把binlog刷下去，是最安全但是性能损耗最大的设置）
 - 参数8：开启线程池参数one-thread-per-connection。 开启线程池可以很大程度上能够避免因无法预测的热点数据导致宕机的事件发生。开启了1024个客户端，同时发送sql请求，mysql实例的qps也能稳定在最高值12000左右，相比于原来未开启线程池时的qps在1200左右，提高了9倍。 阿里云rds版本更新中有说明，本次更新数据库实例qps提高了数十倍，实际上就是开启了线程池，在多客户端请求下，qps稳定在最大值。
-    
+  
 - 2、其次，第二步在业务开发阶段，数据库表设计【程序员】： 
   - 比如严格控制每个字段的大小，尽可能保证B+树的高闪出性；根据业务需求进行索引设计； 
   - 根据二级索引的设计测评是否需要开启5.6或者5.7的mrr优化，调整read_rnd_buffer_size。 
@@ -135,6 +162,7 @@ MySQL调优场景描述【从部署到上线】
 ## 2、有没有SQL查询优化经验？如何调优的？调优思路是？业务出现劣化/腐化情况下，这时候是如何进行sql优化的？
 
 - 1、开启慢查询日志，打开`slow_query_log`参数，设置`long_query_time`，记录超过该long_query_time的sql语句。
+
 - 2、explain sql语句，关注 type、rows、filtered、extra、key等字段；
     - type：表示连接类型：system>const>eq_ref>ref>index_merge>unique_subquery>index>all等等
     - rows：表示读取的记录数，估值。
@@ -145,11 +173,16 @@ MySQL调优场景描述【从部署到上线】
        - use where：表示使用where条件过滤。
        - use temporary：表示使用临时表。性能差，需要格外优化。一般出现在group by语句。
        - use index condition：表示使用索引下推。利用索引在存储引擎层进行数据过滤，以减少回表。
+    
+    - key：查看是否命中了索引。
+    
 - 3、profile分析，explain是预估，profile可以进一步了解SQL执行的状态和时间消耗。需要开启`profiling`参数。打开后，执行完SQL语句后，再执行`show profile`或者`show profile for query_id`查看。 
+
 - 4、Optimizer Trace可以跟踪执行语句的解析优化全过程。开启`set optimizer_trace="enable=on"`，然后执行sql，执行完sql之后查看表`select * from information_schema.optimizer_trace`，查看其执行树，一般分为三个阶段：join_preparation、join_optimization、join_execution。
+
 - 5、最后确认问题，采取对应的措施。
-    - 多数慢SQL都跟索引有关，比如不加索引，索引不生效、不合理等，这时候可以优化索引。
-    - 还可以优化SQL语句，下一个面试题。
+    - 多数慢SQL都跟索引有关，比如不加索引，索引失效、不合理等，这时候可以优化索引。
+    - 还可以优化SQL语句，见下一个面试题。
     - 如果单表数据量过大导致慢查询，则可以考虑分库分表。
     - 如果存量数据量太大，考虑是否可以让部分数据归档。
     - 如果数据库在刷脏页导致慢查询，考虑是否可以优化一些参数，跟DBA讨论优化方案。
@@ -169,6 +202,11 @@ MySQL调优场景描述【从部署到上线】
 参考链接：https://zhuanlan.zhihu.com/p/609481907
 
 ## 5、说一说MySQL的B+树索引？
+
+- 它是帮助MySQL高效获取数据的数据结构，主要是用来提高数据检索的效率，降低数据库的IO成本，同时通过索引列对数据进行排序，降低数据排序的成本，也能降低了CPU的消耗。
+- 采用的B+树的数据结构来存储索 引，选择B+树的主要原因是【这也是和B树的区别】：
+  - 第一是磁盘读写代价更低，非叶子节点只存储指针，叶子节点存储数据。
+  - 第二是便于扫库和区间查询，叶子节点是一个双向链表。
 
 ## 6、MySQL中有哪些锁？它们有哪些优缺点？
 参考链接：https://zhuanlan.zhihu.com/p/636972366
@@ -192,18 +230,29 @@ SELECT * FROM INFORMATION_SCHEMA.INNODB_LOCK_WAITS;
 kill PID;
 ```
 
-## 8、MySQL如何解决幻读的？
+## 9、MySQL如何实现原子性、一致性、隔离性和持久性的？
+- 持久性：redo log
+- 原子性和一致性：undo log
+- 隔离性：锁和MVCC
+  - MVCC实现：隐藏字段、版本链[undo log日志链]、readView
 
 
 # 五、Redis
 
 ## 1、Redis在工作过程中的使用场景？缓存结构是怎么设计的？Why？缓存的数据结构？数据量？
 
+
+
 ## 2、使用缓存的实际过程？如何解决缓存一致性问题？
+
+
 
 ## 3、Redis的主从同步过程？主从过程中延迟遇到的问题？
 
-## 4、
+
+
+## 4、Redis的缓存穿透、缓存击穿、缓存雪崩问题？
+参考链接：https://blog.csdn.net/qq_41822345/article/details/125568012
 
 
 
@@ -220,16 +269,29 @@ kill PID;
 
 
 
+
+
 # 九、MongoDB
+
+
 
 
 
 # 十、算法
 
+常考算法题：https://blog.csdn.net/qq_41822345/article/details/123122339
+
 # 十一、计算机网络
 ## 1、三次握手？
+参考链接：https://blog.csdn.net/qq_41822345/article/details/128882826
+
 ## 2、HTTP1.0 和 HTTP1.1和 HTTP2.0 和 HTTP3.0有哪些区别与改进？
+
+参考链接：https://blog.csdn.net/weixin_53186633/article/details/123624445
+
 ## 3、SSL协议？
+
+参考链接：https://baike.baidu.com/item/%E5%AE%89%E5%85%A8%E5%A5%97%E6%8E%A5%E5%B1%82/9442234?fr=ge_ala
 
 
 
