@@ -173,8 +173,16 @@ MySQL调优场景描述【从部署到上线】
        - use where：表示使用where条件过滤。
        - use temporary：表示使用临时表。性能差，需要格外优化。一般出现在group by语句。
        - use index condition：表示使用索引下推。利用索引在存储引擎层进行数据过滤，以减少回表。
-    
     - key：查看是否命中了索引。
+```shell
+mysql> explain SELECT * FROM `OrdersTable`  WHERE `OrdersTable`.`deleted_at` IS NULL AND ((parent_uuid = 'c7240f4c4dc4a20155a10' and order_type = 1 ));
++----+-------------+-------------+------------+------+-----------------------+-----------------------+---------+-------+------+----------+------------------------------------+
+| id | select_type |   table     | partitions | type | possible_keys         | key                   | key_len | ref   | rows | filtered | Extra                              |
++----+-------------+-------------+------------+------+-----------------------+-----------------------+---------+-------+------+----------+------------------------------------+
+|  1 | SIMPLE      | OrdersTable | NULL       | ref  | idx_Orders_deleted_at | idx_Orders_deleted_at | 5       | const | 1419 |     1.00 | Using index condition; Using where |
++----+-------------+-------------+------------+------+-----------------------+-----------------------+---------+-------+------+----------+------------------------------------+
+1 row in set, 1 warning (0.00 sec)
+```
     
 - 3、profile分析，explain是预估，profile可以进一步了解SQL执行的状态和时间消耗。需要开启`profiling`参数。打开后，执行完SQL语句后，再执行`show profile`或者`show profile for query_id`查看。 
 
@@ -231,10 +239,14 @@ kill PID;
 ```
 
 ## 9、MySQL如何实现原子性、一致性、隔离性和持久性的？
-- 持久性：redo log
-- 原子性和一致性：undo log
+- 持久性：redo log【Buffer Pool缓存中修改的数据如何保证一定刷盘成功→WAL预写日志，所有修改先写入redo log日志，再更新Buffer Pool】
+- 原子性：undo log【事务执行失败，则利用undo log中的信息将数据回滚】
 - 隔离性：锁和MVCC
+  - （一个事务）写操作对（另外一个事务）写操作的影响：锁机制保证隔离性
+  - （一个事务）写操作对（另外一个事务）读操作的影响：MVCC机制保证隔离性
   - MVCC实现：隐藏字段、版本链[undo log日志链]、readView
+    - 隐藏字段：db_trx_id、db_roll_pointer[版本链的关键]、db_row_id
+- 一致性：前面三个特性保证了一致性。
 
 
 # 五、Redis
