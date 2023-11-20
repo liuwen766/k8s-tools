@@ -1,0 +1,28 @@
+- 启动vagrant虚拟机，里面有数据库等（必须），如vagrant up（重要级别1）
+- nacos注册服务和配置服务（重要级别1）
+- 网关，进行路由（重要级别1）
+- renren-fast，提供验证码等功能（必须）
+- renrenfast-vue（必须）
+  - 需要install等操作
+
+
+
+### 私有配置
+
+指的是你自己要运行必须有的内容
+
+数据库名要配置对
+
+第三方服务里的oss配置
+
+前端src/components/upload/multiUpload.vue，有个action信息，要有自己的oss
+
+#### 数据库的配置
+
+每个项目下yaml有数据库的配置
+
+#### 阿里云存储
+
+### nginx
+
+在P150作用配置了nginx动静分离，修改了index.html的静态资源前缀

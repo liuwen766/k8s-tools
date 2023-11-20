@@ -1,0 +1,18 @@
+博客：https://blog.csdn.net/hancoder
+
+本项目专栏地址：https://blog.csdn.net/hancoder/category_10822407.html
+
+个人邮箱553736044@qq.com   支付宝同号，支付后可以索要笔记
+
+版本更迭：
+
+- v2020：基本只有P1-P50内容较为完善
+- v2021-2：P1-P250作用
+- v2021-3：高级篇重新整理结束
+- v2021-4：添加了很多注释与整理，高级篇基本重新整理结束
+- v2021-10：新增DevOps内容，替换图床
+- v2022-11：更新图床
+
+如发现博客有更新，可以凭原来邮件重新索要最新版
+
+![支付码](https://i0.hdslb.com/bfs/album/ff3fb7e24f05c6a850ede4b1f3acc54312c3b0c6.png)
