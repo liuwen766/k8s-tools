@@ -171,6 +171,8 @@ MySQL调优场景描述【从部署到上线】
 
 ## 2、有没有SQL查询优化经验？如何调优的？调优思路是？业务出现劣化/腐化情况下，这时候是如何进行sql优化的？
 
+- 参考链接：https://mp.weixin.qq.com/s/e0WtvBf-LJkCG4NTxiiStg
+
 - 1、开启慢查询日志，打开`slow_query_log`参数，设置`long_query_time`，记录超过该long_query_time的sql语句。
 
 - 2、explain sql语句，关注 type、rows、filtered、extra、key等字段；
@@ -304,6 +306,9 @@ kill PID;
 常考算法题：https://blog.csdn.net/qq_41822345/article/details/123122339
 
 # 十一、计算机网络
+
+- 参考链接：https://mp.weixin.qq.com/s/QOcxNmjTJPHJsxEay-oVOg
+
 ## 1、三次握手？
 参考链接：https://blog.csdn.net/qq_41822345/article/details/128882826
 

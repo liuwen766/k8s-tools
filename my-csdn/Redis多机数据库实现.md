@@ -1,10 +1,27 @@
 # Redis多机数据库
 
+Redis数据结构与对象：https://blog.csdn.net/qq_41822345/article/details/130456081
+Redis单机数据库：https://blog.csdn.net/qq_41822345/article/details/130909789
+
 ## 一、复制
+
+### 1、
+
+### 2、
+
+### 3、
 
 
 
 ## 二、哨兵
+
+### 1、
+
+### 2、
+
+### 3、
+
+
 
 ![](D:\MyGitHub\my-tools\my-csdn\Redis sentinel结构.jpg)
 
@@ -30,3 +47,9 @@ sentinel failover-timeout mymaster 180000
 ```
 
 ## 三、集群
+
+### 1、
+
+### 2、
+
+### 3、
