@@ -1,6 +1,7 @@
 # Redis多机数据库
 
 Redis数据结构与对象：https://blog.csdn.net/qq_41822345/article/details/130456081
+
 Redis单机数据库：https://blog.csdn.net/qq_41822345/article/details/130909789
 
 > 先总结一下Redis的四种部署模式：
@@ -122,14 +123,23 @@ Redis的复制功能分为 **同步** 和 **命令传播** 两个操作。
 
 #### b、复制实现步骤
 
-- step1、
-- step2、
-- step3、
-- step4、
-- step5、
-- step6、
-- step7、
-- step8、
+- 1、连接建立阶段
+  - step1、保存主节点信息
+  - step2、建立socket连接
+  - step3、发送ping命令
+  - step4、身份验证
+  - step5、发送从节点端口信息
+- 2、数据同步阶段
+  - step1、首先，从节点根据当前状态，决定如何调用psync命令。
+    - 全量复制：用于初次复制或其他无法进行部分复制的情况，将主节点中的所有数据都发送给从节点，是一个非常重型的操作。
+    - 部分复制：用于网络中断等情况后的复制，只将中断期间主节点执行的写命令发送给从节点，与全量复制相比更加高效。
+  - step2、主节点根据收到的psync命令，及当前服务器状态，决定执行全量复制还是部分复制。
+    - 如果主节点版本低于Redis2.8，则返回-ERR回复，此时从节点重新发送sync命令执行全量复制；
+    - 如果主节点版本够新，且runid与从节点发送的runid相同，且从节点发送的offset之后的数据在复制积压缓冲区中都存在，则回复+CONTINUE，表示将进行部分复制，从节点等待主节点发送其缺少的数据即可；
+    - 如果主节点版本够新，但是runid与从节点发送的runid不同，或从节点发送的offset之后的数据已不在复制积压缓冲区中(在队列中被挤出了)，则回复+FULLRESYNC ，表示要进行全量复制，其中runid表示主节点当前的runid，offset表示主节点当前的offset，从节点保存这两个值，以备使用。
+- 3、命令传播阶段
+  - step1、在这个阶段主节点将自己执行的写命令发送给从节点，从节点接收命令并执行，从而保证主从节点数据的一致性。
+  - step2、在命令传播阶段，除了发送写命令，主从节点还维持着心跳机制：`PING` 和 `REPLCONF ACK`。
 
 ### 4、心跳检测
 
@@ -141,44 +151,71 @@ Redis的复制功能分为 **同步** 和 **命令传播** 两个操作。
 
 由一个或多个Sentinel去监听（并且Sentinel也可以互相监视）任意多个主服务以及主服务器下的所有从服务器，并在被监视的主服务器进入下线状态时，自动将下线的主服务器属下的某个从服务器升级为新的主服务器，然后由新的主服务器代替已经下线的主服务器继续处理命令请求。
 
-### 1、Sentinel初始化
+### 1、Sentinel概念
 
-### 2、Sentinel原理
+- Sentinel的三个任务
+  - 监控
+  - 提醒
+  - 自动故障迁移
 
-### 3、Sentinel故障转移过程
+- Sentinel网络
+  - sentinel本身是监督者的身份，没有存储功能。
+  - 监控同一个Master的Sentinel会自动连接，组成一个分布式的Sentinel网络，互相通信并交换彼此关于被监视服务器的信息。
+  - 在整个体系中一个sentinel者或一群sentinels与主从服务架构体系是监督与被监督的关系。
+  - 为什么需要一个这样的Sentinel网络？
+    - sentinel在整个架构体系中有如下三种交互：sentinel与主服务器、sentinel与从服务器、sentinel与其他sentinel。
+    - 既然是交互，首先无可避免的就要构建这样的一个交互网络，需要节点的注册与发现、节点之间的通信连接、节点保活、节点之间的通信协议等。
+
+
+### 2、故障切换过程
+
+- step1、判定主观下线
+- step2、判定客观下线
+- step3、选举Sentinel Leader【基于Raft协议】
+  - a、
+  - b、
+  - c、
+  - d、
+  - e、
+  - f、
+- step4、选举新的主服务器。这是由领头Sentinel会在所有Slave中选出新的Master，选举规则如下：
+  - a、删除列表中所有处于下线或者短线状态的Slave。
+  - b、删除列表中所有最近5s内没有回复过领头Sentinel的INFO命令的Slave。
+  - c、删除所有与下线Master连接断开超过down-after-milliseconds * 10毫秒的Slave。
+  - d、领头Sentinel将根据Slave优先级，对列表中剩余的Slave进行排序，并选出其中优先级最高的Slave。
+  - e、如果有多个具有相同优先级的Slave，那么领头Sentinel将按照Slave复制偏移量，选出其中偏移量最大的Slave。
+  - f、如果有多个优先级最高，偏移量最大的Slave，那么根据运行ID最小原则选出新的Master。
+- step5、让其余所有Slave服务器复制新的Master服务器。
+- step6、让已下线的Master服务器变成新的Master服务器的Slave。
 
 
 
 ![](D:\MyGitHub\my-tools\my-csdn\Redis sentinel结构.jpg)
 
-```shell
-# 放行所有 IP 限制
-bind 0.0.0.0
-# 进程端口号
-port 26379
-# 后台启动
-daemonize yes
-# 日志记录文件
-logfile "/usr/local/redis/log/sentinel.log"
-# 进程编号记录文件
-pidfile /var/run/sentinel.pid
-# 指示 Sentinel 去监视一个名为 mymaster 的主服务器 2为制裁权重值
-sentinel monitor mymaster 192.168.10.101 6379 2
-# 访问主节点的密码【如果设置密码，有必要统一密码的设置】
-sentinel auth-pass mymaster 123456
-# Sentinel 认为服务器已经断线所需的毫秒数
-sentinel down-after-milliseconds mymaster 10000
-# 若 Sentinel 在该配置值内未能完成 failover 操作，则认为本次 failover 失败
-sentinel failover-timeout mymaster 180000
-```
 
 ## 三、集群
 
-集群模式实现了Redis的分布式存储，即每台节点存储不同的内容，来解决在线扩容的问题。 
+相关参考：
 
-当遇到单机内存、并发、流量等瓶颈时，可以采用集群Cluster架构达到负载均衡的目的。
+Redis Cluster数据分片实现原理、及请求路由实现：https://blog.csdn.net/Seky_fei/article/details/107611850
 
-### 1、
+Redis集群 - 图解 - 秒懂（史上最全)：https://www.cnblogs.com/crazymakercircle/p/14698576.html#autoid-h3-7-0-0
+
+> - RedisCluster 是 Redis 的亲儿子，它是 Redis 作者自己提供的 Redis 集群化方案。
+> - redis在3.0上加入了 Cluster 集群模式，实现了 Redis 的分布式存储，也就是说每台 Redis 节点上存储不同的数据。cluster模式为了解决单机Redis容量有限的问题，将数据按一定的规则分配到多台机器，内存/QPS不受限于单机，可受益于分布式集群高扩展性。
+> - Redis Cluster是一种服务器Sharding技术(分片和路由都是在服务端实现)，采用多主多从，每一个分区都是由一个Redis主机和多个从机组成，片区和片区之间是相互平行的。
+
+### 1、几个概念
+
+- 槽slot、key、
+
+- 为什么引入槽？
+  - 解耦数据和节点之间的关系，简化了节点扩容和收缩难度
+  - 节点自身维护槽的映射关系，不需要客户端 或 代理服务维护数据分片关系。
+  - Redis Cluster的节点之间会共享消息，每个节点都知道另外节点负责管理的槽范围。每个节点只能对自己负责的槽进行维护 和 读写操作。
+
+- 为什么是16384个槽位（2^14）?
+  - 1
 
 ### 2、
 
