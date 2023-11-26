@@ -4,7 +4,7 @@ Redis数据结构与对象：https://blog.csdn.net/qq_41822345/article/details/1
 
 Redis单机数据库：https://blog.csdn.net/qq_41822345/article/details/130909789
 
-> 先总结一下Redis的四种部署模式：
+> 先总结一下Redis的四种部署模式（除了第一种是单机数据库，其它都是**多机数据库**）：
 >
 > - 1、单机模式
 >   - 概念：Redis单机模式是最简单的部署模式，Redis将数据存储在单个节点上。 
@@ -255,40 +255,54 @@ Sentinel模式下的服务器状态如图：
 
 ![](D:\MyGitHub\myproject\my-tools\my-csdn\Redis sentinel结构.jpg)
 
-### 3、故障切换过程
+### 3、故障转移过程
 
 Sentinel模式下，Sentinel初始化完成之后，在Sentinel网络中对所有的Matser和Slave进行监控。如果这时出现主服务器故障，则走如下流程。
 
 - step1、判定主观下线（每1秒一次）
 
-  
+  Sentinel会向所有与它创建了命令连接实例（包括主服务器、从服务器、其它Sentinel）发送`Ping`命令。并根据有效回复 `Pong`、`-Loading` 、`-Matserdown` （其它回复均为无效回复）进行检测。如果超过 `down-after-milliseconds`毫秒都没有有效回复，Sentinel就会把matser标记为主观下线。
+
+  >  `down-after-milliseconds`也是Sentinel判断master属下的slave，以及监视该matser的其它Sentinel是否进入主观下线的标准。
 
 - step2、判定客观下线
 
-  
+  当Sentinel检测到主观下线后，就会询问其它监视该master的Sentinel，当超过一定数量的Sentinel都认为该Master已经下线后，就会将主服务器判定为客观下线。
 
-- step3、选举Sentinel Leader【基于Raft协议】
-  - a、
-  - b、
-  - c、
-  - d、
-  - e、
-  - f、
+  - a、Sentinel发送`is-matser-down-by-addr`命令，对其它Sentinel进行询问
+  - b、其它Sentinel接收`is-matser-down-by-addr`命令，分析并检查master是否下线，并做出回复。
+  - c、Sentinel接收回复，对回复进行统计。当超过一定数量的Sentinel都认为该Master已经下线后，就会将主服务器判定为客观下线。
+
+- step3、选举Sentinel Leader【**基于Raft协议**】
   
-- step4、选举新的主服务器。这是由领头Sentinel会在所有Slave中选出新的Master，选举规则如下：
+  > 当检测出客观下线后，所有监视这个下线master的Sentinel需要先进行leader选举，由领导Sentinel进行故障转移操作。
+  
+  - a、任何Sentinel都有成为leader的机会。每进行一次选择，Sentinel的epoch就会自增一次。
+  - b、每个发现master客观下线的Sentinel都会要求其它Sentinel将投自己一票，每个Sentinel都有一票，规则是先到先得。
+  - c、源Sentinel接收其它目标Sentinel的回复，并判断回复中epoch和leader-runid，如果epoch相同，并且leader-runid就是自己，那么说明目标Sentinel认可自己作为局部leader。
+  - d、当某个Sentinel被超过半数以上的Sentinel认可，那么这个Sentinel就会从局部leader成为全局leader，即领头Sentinel。
+  - e、因为每个Sentinel只有一票，且需要超过半数的投票，所有每个配置纪元epoch中最多只会有一个Sentinel被选举为leader。
+  - f、如果在给定的时间内，没有选举出leader，那么epoch+1，重新进行一次选举。
+  
+- step4、选举新的主服务器。这是**由领头Sentinel会在所有Slave中选出新的Master**，选举规则如下：
   - a、删除列表中所有处于下线或者短线状态的Slave。
   - b、删除列表中所有最近5s内没有回复过领头Sentinel的INFO命令的Slave。
-  - c、删除所有与下线Master连接断开超过down-after-milliseconds * 10毫秒的Slave。
+  - c、删除所有与下线Master连接断开超过`down-after-milliseconds * 10`毫秒的Slave。
   - d、领头Sentinel将根据Slave优先级，对列表中剩余的Slave进行排序，并选出其中优先级最高的Slave。
   - e、如果有多个具有相同优先级的Slave，那么领头Sentinel将按照Slave复制偏移量，选出其中偏移量最大的Slave。
   - f、如果有多个优先级最高，偏移量最大的Slave，那么根据运行ID最小原则选出新的Master。
   
 - step5、让其余所有Slave服务器复制新的Master服务器。
 
-- step6、让已下线的Master服务器变成新的Master服务器的Slave。
-
+- step6、当下线的Master重新上线后，将它变成新的Master服务器的Slave。
 
 ## 三、集群
+
+Redis集群是由Redis提供的分布式数据库方案，集群通过分片来进行数据共享，并提供复制和故障转移功能。
+
+> - RedisCluster 是 Redis 的亲儿子，它是 Redis 作者自己提供的 Redis 集群化方案。
+> - redis在3.0上加入了 Cluster 集群模式，实现了 Redis 的分布式存储，也就是说每台 Redis 节点上存储不同的数据。cluster模式为了解决单机Redis容量有限的问题，将数据按一定的规则分配到多台机器，内存/QPS不受限于单机，可受益于分布式集群高扩展性。
+> - Redis Cluster是一种服务器Sharding技术(分片和路由都是在服务端实现)，采用多主多从，每一个分区都是由一个Redis主机和多个从机组成，片区和片区之间是相互平行的。
 
 相关参考：
 
@@ -296,22 +310,185 @@ Redis Cluster数据分片实现原理、及请求路由实现：https://blog.csd
 
 Redis集群 - 图解 - 秒懂（史上最全)：https://www.cnblogs.com/crazymakercircle/p/14698576.html#autoid-h3-7-0-0
 
-> - RedisCluster 是 Redis 的亲儿子，它是 Redis 作者自己提供的 Redis 集群化方案。
-> - redis在3.0上加入了 Cluster 集群模式，实现了 Redis 的分布式存储，也就是说每台 Redis 节点上存储不同的数据。cluster模式为了解决单机Redis容量有限的问题，将数据按一定的规则分配到多台机器，内存/QPS不受限于单机，可受益于分布式集群高扩展性。
-> - Redis Cluster是一种服务器Sharding技术(分片和路由都是在服务端实现)，采用多主多从，每一个分区都是由一个Redis主机和多个从机组成，片区和片区之间是相互平行的。
+> -  Redis 集群方案主要有3类：
+>   - 1、基于官方的 Redis cluster 的**服务端分片方案**。(分片和路由都是在服务端实现)
+>   - 2、使用类 codis 的**代理模式架构**，按组划分，实例之间互相独立。(分片和路由在代理实现)
+>   - 3、代理模式和服务端分片相结合的模式。
 
 ### 1、几个概念
 
-- 槽slot、key、
+- 集群cluster、节点node、槽slot、键key之间的关系
 
-- 为什么引入槽？
-  - 解耦数据和节点之间的关系，简化了节点扩容和收缩难度
+  - cluster：node = 1：n
+
+  - node：slot = 1：n
+  - slot：key = 1：n
+
+- 什么是槽slot？
+
+  Redis Cluster是Redis3.0引入的一种无中心化的集群，客户端可以向任何一个节点通信，Redis Cluster将数据的key通过将CRC16算法的结果取模16383后，分给16384个slot槽，集群的每个节点负责一部分hash槽，节点只负责管理映射到这个槽的KV数据，对于不是当前槽的KV数据，会向客户端发送一个MOVED，表示需要客户端重新重定向到其它节点。
+
+- 为什么引入槽slot？
+  - 解耦数据和节点之间的关系，简化了节点扩容和收缩难度。
   - 节点自身维护槽的映射关系，不需要客户端 或 代理服务维护数据分片关系。
   - Redis Cluster的节点之间会共享消息，每个节点都知道另外节点负责管理的槽范围。每个节点只能对自己负责的槽进行维护 和 读写操作。
 
+- 为什么没有使用一致性hash算法，而是使用了哈希槽预分片？ 
+  - **一致性哈希算法对于节点的增减都只需重定位环空间中的一小部分数据，具有较好的容错性和可扩展性。**
+  - 当服务节点太少或者有节点挂掉时，容易造成数据倾斜——大量的缓存数据集中到了一台或者几台服务节点上。
+
 - 为什么是16384个槽位（2^14）?
-  - 1
+  - 如果槽位是16384个，发送心跳信息的消息头是16384/8/1024 = 2k。 
+  - Redis的集群主节点数量一般不会超过1000个。
+  - 集群中节点越多，心跳包的消息体内的数据就越多，如果节点过多，也会造成网络拥堵。
+  - 对于节点数在1000个以内的Redis Cluster，16384个槽位完全够用。
 
-### 2、
+### 2、集群创建流程
 
-### 3、
+> 集群创建流程就是一个创建集群实例数据结构体（一定都会有的结构体：redisServer、redisClient；集群模式下才有数据：clusterNode、clutserLink、clutserState等）的过程。
+
+#### a、启动节点
+
+- Redis服务器在启动时会根据`cluster-enabled`配置选项是否为yes来决定是否开启服务器的集群模式。
+- Redis节点在集群模式下会继续使用所有在**单机模式中使用的服务器组件**：
+  - 文件事件处理器：处理命令请求和返回命令回复
+  - 时间事件处理器：执行`serverCron`函数（这时该函数也执行在集群模式下需要执行的操作：发送Gossip消息、下线检测、故障转移等）
+  - redisDb数据库：保存键值对。不过集群模式下只有db0数据库。
+  - redisServer/redisClient数据结构：保存服务器状态和客户端状态。
+  - 持久化：RDB和AOF持久化。
+
+- 初始化集群模式下数据结构：
+  - clusterNode：每个节点都会使用一个clusterNode来记录自己的节点状态——比如节点名称、ip和端口、slot信息等。
+  - clutserLink：保存连接节点所需的有关信息——比如socket套接字、输入缓冲区/输出缓冲区等。
+  - clutserState：每个节点都会使用一个clutserState来记录当前节点在集群中的状态——比如配置纪元、集群节点名单、槽指派信息等。
+
+- cluster meet命令
+
+  该命令用于将一个节点加入到集群中。这个过程类似三次握手，先由节点A向节点B发送meet消息；节点B返回pong消息给节点A，这是对meet消息的确认；最后节点A还会发送一次ping消息给节点B，告诉节点B收到了B的pong消息，至此握手完成。
+
+- Gossip协议
+
+  通过Gossip协议传播新节点的加入，让其它节点也与新节点进行握手。最终所有节点都会认识新节点。
+
+#### b、槽指派
+
+- Redis集群的整个数据库被分为16384个槽slot，每个slot都必须分配到某个节点上，否则集群将处于下线状态。
+
+- 节点的clusterNode结构记录了节点的槽指派信息。
+
+  > - slots属性记录了节点负责处理槽信息。numslots属性记录了当前节点负责处理的槽数量
+  > - slots是一个二进制位数组。长度为16384/8=2048，每个slots[i]有8位二进制，代表了16384个槽。
+
+- 传播节点的槽指派信息
+
+  每个节点都会将自己的slots数组通过消息发送给集群中的其它节点。这样集群中的每个节点都会知道所有的槽指派信息。
+
+- 记录集群的槽指派信息
+
+  集群的槽指派信息当然是记录在clutserState.slots中，它的每个数据项都是一个指向clusterNode结构的指针。
+
+  > - clutserNode.slots数组只记录了当前节点的槽指派信息。
+  > - clutserState.slots数组记录了全部节点的槽指派信息。
+
+- cluster addslots命令
+
+  通过该命令将槽指派给执行该命令的节点。
+
+### 3、集群执行命令流程
+
+当客户端向节点发送与数据库键key有关的命令时，需要经过以下步骤：
+
+- step1：计算键属于哪个槽
+
+  > CRC16（key）& 16383
+
+- step2：判断槽是否由当前节点负责处理
+
+  根据step1计算出一个值 i 之后，判断clutserState.slots[i] = clutserState.myself
+
+- step3：如果clutserState.slots[i] != clutserState.myself。则根据clutserState.slots[i]所指向的clutserNode结构，获取IP：port，通过moved错误返回给客户端，从而转向负责处理槽slots[i]的节点。
+
+#### moved错误
+
+当节点发现键 key 所在的槽 slot[i] 并非由自己负责处理的时候，节点就会返回给客户端一个moved错误（包含了正确的负责处理槽 slot[i] 的节点），从而指引客户端专项正在负责槽的节点。
+
+> 客户端会先根据moved错误提供的IP地址和端口来连接节点，然后再进行转向。
+
+#### slots_to_keys
+
+clutserState.slots_to_keys是一个跳跃表，它保存了槽与键之间的关系。通过记录各个数据库键所属的槽，节点可以很方便的对属于某个或某些槽的所有数据库键进行批量操作。比如重新分片。
+
+### 4、重分片流程
+
+Redis集群的重新分片操作是由管理组件`redis-trib`负责执行的，它通过向源节点和目标节点发送命令来进行重新分片操作步骤以及执行的命令如下：
+
+- step1：开始对槽slot进行重新分片操作
+
+- step2：通知目标节点准备导入槽slot的键值对；`cluster setslot slot_id importing source_id`
+- step3：通知源节点准备迁移槽slot的键值对；`cluster setslot slot_id migrating target_id`
+- step4：向源节点获取最多count个属于槽slot的键值对；`cluster getkeyinslot slot_id count`
+- step5：将step4获取的每个键迁移到目标节点（通过pipeline 机制批量迁移）；`migrate target_id target_port kets `
+- step6：重复执行step4和step5，直到属于槽slot的所有keys都被迁移完毕。
+- step7：传播槽指派信息；任意发送`cluster setslot slot_id node target_id`命令给某个节点，最终会通过Gossip协议传播给整个集群。
+
+如果重新分片涉及到多个槽slot，那么`redis-trib`对于每个槽分别执行上面的操作。
+
+#### ask错误
+
+> moved错误和ask错误的区别？
+>
+> - 区别在于槽slot[i]目前由哪个节点负责。
+>   - 对于moved错误，说明slot[i]由其它节点负责，之后对于slot[i]的操作会直接发送到负责它的节点。
+>   - 对于ask错误，说明slot[i]正在进行重分片，slot[i]的负责节点还在迁移中。
+>
+> - 当客户端向某个节点发送命令，节点向客户端返回moved异常，告诉客户端数据对应的槽的节点信息；客户端再向正确的节点发送命令时，如果此时正在进行集群扩展或者缩空操作，槽及槽中数据已经被迁移到别的节点了，就会返回ask，这就是ask重定向机制。 
+
+### 5、伸缩流程
+
+> Redis集群中的每个node(节点)负责分摊这16384个slot中的一部分，也就是说，每个slot都对应一个node负责处理。当动态添加或减少node节点时，只需要将16384个槽做个再分配，将槽中的键值和对应的数据迁移到对应的节点上。
+>
+> redis cluster提供了灵活的节点扩容和收缩方案。在不影响集群对外服务的情况下，可以为集群添加节点进行扩容，也可以下线部分节点进行缩容。可以说，槽是 Redis 集群管理数据的基本单位，集群伸缩就是槽和数据在节点之间的移动。
+
+集群的伸缩流程原理基于重新分片原理。
+
+- a、集群扩容
+
+  当一个 Redis 新节点运行并加入现有集群后，我们需要为其迁移槽和槽对应的数据。首先要为新节点指定槽的迁移计划，会确保迁移后每个节点负责相似数量的槽，从而保证这些节点的数据均匀。 
+
+- b、集群收缩
+  - 首先需要确认下线节点是否有负责的槽，如果有，需要把槽和对应的数据迁移到其它节点，保证节点下线后整个集群槽节点映射的完整性。
+  - 当下线节点不再负责槽或者本身是从节点时，就可以通知集群内其他节点忘记下线节点，当所有的节点忘记改节点后可以正常关闭。
+
+### 6、故障转移流程
+
+Redis集群的节点分为Master和Slave，其中Master负责处理槽slot，而从节点slave用于复制master（一个节点成为从节点，并开始复制某个主节点的这一信息会通过消息发送给集群中的其它节点，最终集群中的所有节点都会知道这一信息），并可以在master下线时，代替下线主节点成为新主节点继续处理命令请求。
+
+- step1、故障检测
+  - 集群中的每个节点都会定期的向集群中的其它节点发送ping信息，来检测对方是否在线。
+  - 集群中的各个节点会通过互相发送消息的方式来交换集群中各个节点的状态信息——比如某个节点是否处于疑似下线状态（PFail）、还是已下线状态（Fail）。
+  - 集群中超过半数的matser节点都认为某个master节点为疑似下线状态（PFail），那么该master节点将被标记为已下线状态（Fail）。
+
+- step2、故障转移
+  - 1、当一个从节点发现自己的主节点为已下线状态（Fail），从节点会要求集群中的其它主节点选举新的主节点。（同样也是**基于Raft协议**。并且与选举领头Sentinel的流程非常相似。）
+  - 2、被选中的从节点执行`slave of no one`成为新的主节点。
+  - 3、新的主节点会主动撤销所有对已下线主节点的槽指派，并将槽指派给自己。
+  - 4、新的主节点向集群传播自己接管了下线的主节点。
+  - 5、新的主节点开始接收属于自己负责的槽的key命令。故障转移完成。
+
+### 7、消息
+
+Redis集群中的各个节点通过发送和接收消息来进行通信。节点发送的消息主要有以下五种：
+
+- 1、meet消息：节点加入集群的命令。
+- 2、ping消息：用于检测节点是否在线。集群中的每个节点每隔一秒就会从已知节点的列表中随机选择5个节点进行ping检测。如果当前节点发现自己记录的某些节点回复pong消息的时间超过了当前节点设置的cluster-node-timeout选线设置时长的一半，则当前节点主动发送ping检测，防止自己长时间都没有随机选择到某些节点进行ping检测，造成信息更新滞后。
+- 3、pong消息：用于响应meet消息或者ping消息。也可用于向集群广播pong消息以刷新其它节点对自己的认识。
+
+> - Redis集群中各个节点通过`Gossip`协议来交换自己知道的节点状态消息。**Gossip协议的实现由meet、ping、pong三种消息实现**，它们都由`clusterMsgDataGossip`结构组成。
+> - 每次发送meet、ping、pong消息时，发送者都会从自己的已知节点列表中随机选出两个节点的信息（包括节点名称、ip和端口等）保存到要发送的消息结构体clusterMsgDataGossip结构里面。
+
+- 4、fail消息：用于告知集群中的其它节点有节点进入fail状态。
+
+> 在集群的节点数量比较大的情况下，单纯的使用`Gossip`协议来传播节点的已下线信息会给节点的信息更新带来一定的延迟，因为这个协议通常需要一段时间才能传播至整个集群，而发送Fail消息会让集群里的所有节点立即知道某个主节点已经下线，从而尽快判断是否需要将集群标记为下线，又或者对下线主节点进行故障转移。
+
+- 5、publish消息：当节点接收到某个publish命令时，不仅会执行这个命令，并向集群广播这条publish命令。
+
