@@ -207,3 +207,11 @@ Raft算法则适用于对性能要求较高、对数据一致性要求也比较�
 
 参考文档：https://zhuanlan.zhihu.com/p/31780743/
 
+## 六、Raft应用
+
+### 1、ETCD
+
+### 2、Redis
+
+### 3、RocketMQ
+
