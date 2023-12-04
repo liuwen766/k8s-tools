@@ -258,6 +258,7 @@ kill PID;
   - （一个事务）写操作对（另外一个事务）读操作的影响：MVCC机制保证隔离性
   - MVCC实现：隐藏字段、版本链[undo log日志链]、readView
     - 隐藏字段：db_trx_id、db_roll_pointer[版本链的关键]、db_row_id
+    - MVCC——https://mp.weixin.qq.com/s/6lQMW6L6w9rGNaggk_rfLQ
 - 一致性：前面三个特性保证了一致性。
 
 
