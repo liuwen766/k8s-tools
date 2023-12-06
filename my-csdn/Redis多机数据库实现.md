@@ -253,7 +253,7 @@ Redis在哨兵模式下，在监控主从服务器之间，需要先完成Sentin
 
 Sentinel模式下的服务器状态如图：
 
-![](D:\MyGitHub\myproject\my-tools\my-csdn\Redis sentinel结构.jpg)
+![](image\Redis sentinel结构.jpg)
 
 ### 3、故障转移过程
 
