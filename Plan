@@ -1,0 +1,32 @@
+
+计划表：
+
+一共9门功课
+1、Go
+2、K8s
+3、MySQL
+4、Redis
+5、MongoDB
+6、Kafka
+Kafka消息积压问题分析
+生产者：Key问题 → https://articles.zsxq.com/id_f0wrwnc0khtk.html
+服务端：partition分区问题
+消费者：Full GC→ rebalance问题 https://articles.zsxq.com/id_n9361w3go1b3.html
+7、RocketMQ
+8、算法
+9、项目
+
+
+个人提升计划：
+每日必刷两道题【一周10道算法题，周末复刷一遍】
+每周至少一篇高质量博客
+复刷自己写的博客
+Kafka/RocketMQ
+MySQL/Redis/MongoDB
+Go/Docker/K8s
+项目：Go极客、秒杀、gulimall、工作项目
+
+本周计划：
+刷完labuladong算法-核心框架汇总部分
+RocketMQ刷完、复习Kafka
+秒杀项目
