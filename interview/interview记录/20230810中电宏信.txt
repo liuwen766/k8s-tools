@@ -1,7 +1,0 @@
-
-岗位要求：java开发应用+python开发AI+go开发k8s
-
-要求的技术栈：
-docker+k8s+基于k8s二次开发
-java+mysql
-AI+GPU
