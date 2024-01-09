@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"container/heap"
+	"fmt"
+)
 
 func main() {
 	fmt.Println("Hello World!")
@@ -37,7 +40,7 @@ func printListNode(lists *ListNode) {
 	fmt.Println()
 }
 
-// Definition for singly-linked list.
+// ListNode Definition for singly-linked list.
 type ListNode struct {
 	Val  int
 	Next *ListNode
@@ -45,7 +48,100 @@ type ListNode struct {
 
 // 1、合并两个有序链表
 func mergeTwoLists(list1 *ListNode, list2 *ListNode) *ListNode {
-	return list1
+
+	dummy := &ListNode{-1, nil}
+	p := dummy
+
+	p1 := list1
+	p2 := list2
+
+	for p1 != nil && p2 != nil {
+		if p1.Val < p2.Val {
+			p.Next = p1
+			p1 = p1.Next
+		} else {
+			p.Next = p2
+			p2 = p2.Next
+		}
+
+		p = p.Next
+	}
+
+	if p1 != nil {
+		p.Next = p1
+	}
+	if p2 != nil {
+		p.Next = p2
+	}
+	return dummy.Next
+}
+
+// 2、链表的分解
+// 给你一个链表的头节点 head 和一个特定值 x ，请你对链表进行分隔，使得所有 小于 x 的节点都出现在 大于或等于 x 的节点之前。
+func partition(head *ListNode, x int) *ListNode {
+
+	dummy1 := &ListNode{-1, nil}
+	dummy2 := &ListNode{-1, nil}
+	p1 := dummy1
+	p2 := dummy2
+
+	p := head
+	for p != nil {
+		if p.Val < x {
+			p1.Next = p
+			p1 = p1.Next
+		} else {
+			p2.Next = p
+			p2 = p2.Next
+		}
+
+		// ☆☆☆☆☆
+		tmp := p.Next
+		p.Next = nil
+		p = tmp
+	}
+
+	p1.Next = dummy2.Next
+
+	return dummy1.Next
+}
+
+// 3、合并 k 个有序链表
+func mergeKLists(lists []*ListNode) *ListNode {
+	if len(lists) == 0 {
+		return nil
+	}
+	dummy := &ListNode{-1, nil}
+	p := dummy
+
+	pq := make(PriorityQueue, 0)
+	heap.Init(&pq)
+	for i := range lists {
+		if lists[i] != nil {
+			heap.Push(&pq, lists[i])
+		}
+	}
+
+	for pq.Len() > 0 {
+		pop := heap.Pop(&pq).(*ListNode)
+		p.Next = pop
+		if pop.Next != nil {
+			heap.Push(&pq, pop.Next)
+		}
+		p = p.Next
+	}
+
+	return dummy.Next
+}
+
+// 4、寻找单链表的倒数第 k 个节点
+func trainingPlan(head *ListNode, cnt int) *ListNode {
+	return head
+}
+
+// 同类题：删除链表的倒数第 n 个结点
+func removeNthFromEnd(head *ListNode, n int) *ListNode {
+	return head
 }
 
 // 5、寻找单链表的中点
@@ -57,4 +153,47 @@ func middleNode(head *ListNode) *ListNode {
 		slow = slow.Next
 	}
 	return slow
+}
+
+// 6、判断单链表是否包含环并找出环起点
+func hasCycle(head *ListNode) bool {
+	return false
+}
+
+// 同类题：返回链表开始入环的第一个节点。
+func detectCycle(head *ListNode) *ListNode {
+	return head
+}
+
+// 7、判断两个单链表是否相交并找出交点
+func getIntersectionNode(headA, headB *ListNode) *ListNode {
+	return headA
+}
+
+// PriorityQueue 优先级队列，最小堆
+type PriorityQueue []*ListNode
+
+func (pq PriorityQueue) Len() int {
+	return len(pq)
+}
+
+func (pq PriorityQueue) Less(i, j int) bool {
+	return pq[i].Val < pq[j].Val
+}
+
+func (pq PriorityQueue) Swap(i, j int) {
+	pq[i], pq[j] = pq[j], pq[i]
+}
+
+func (pq *PriorityQueue) Push(x interface{}) {
+	node := x.(*ListNode)
+	*pq = append(*pq, node)
+}
+
+func (pq *PriorityQueue) Pop() interface{} {
+	old := *pq
+	n := len(old)
+	node := old[n-1]
+	*pq = old[0 : n-1]
+	return node
 }
