@@ -136,12 +136,29 @@ func mergeKLists(lists []*ListNode) *ListNode {
 
 // 4、寻找单链表的倒数第 k 个节点
 func trainingPlan(head *ListNode, cnt int) *ListNode {
-	return head
+	quick := head
+	for i := 0; i < cnt; i++ {
+		quick = quick.Next
+	}
+	slow := head
+	for quick != nil {
+		quick = quick.Next
+		slow = slow.Next
+	}
+	return slow
 }
 
 // 同类题：删除链表的倒数第 n 个结点
 func removeNthFromEnd(head *ListNode, n int) *ListNode {
-	return head
+	dummy := &ListNode{-1, nil}
+	dummy.Next = head
+
+	tmp := trainingPlan(dummy, n+1)
+
+	tmp.Next = tmp.Next.Next
+
+	// ☆☆☆
+	return dummy.Next
 }
 
 // 5、寻找单链表的中点
@@ -155,22 +172,71 @@ func middleNode(head *ListNode) *ListNode {
 	return slow
 }
 
-// 6、判断单链表是否包含环并找出环起点
+// 6、判断单链表是否包含环
 func hasCycle(head *ListNode) bool {
+	slow := head
+	quick := head
+	for quick != nil && quick.Next != nil {
+		slow = slow.Next
+		quick = quick.Next.Next
+		if quick == slow {
+			return true
+		}
+	}
 	return false
 }
 
-// 同类题：返回链表开始入环的第一个节点。
+// 同类题：判断单链表是否包含环并找出环起点
 func detectCycle(head *ListNode) *ListNode {
-	return head
+	slow := head
+	quick := head
+	for quick != nil && quick.Next != nil {
+		slow = slow.Next
+		quick = quick.Next.Next
+		if slow == quick {
+			break
+		}
+	}
+
+	// ☆☆
+	if quick == nil || quick.Next == nil {
+		return nil
+	}
+
+	slow = head
+	for slow != quick {
+		slow = slow.Next
+		quick = quick.Next
+	}
+
+	return slow
 }
 
 // 7、判断两个单链表是否相交并找出交点
 func getIntersectionNode(headA, headB *ListNode) *ListNode {
-	return headA
+	p1 := headA
+	p2 := headB
+	for p1 != p2 {
+		// p1前进一位
+		if p1 != nil {
+			p1 = p1.Next
+			//	否则p1到headB
+		} else {
+			p1 = headB
+		}
+		// p2前进一位
+		if p2 != nil {
+			p2 = p2.Next
+			//	否则p2到headA
+		} else {
+			p2 = headA
+		}
+	}
+
+	return p1
 }
 
-// PriorityQueue 优先级队列，最小堆
+// PriorityQueue 优先级队列，Go代码实现最小堆
 type PriorityQueue []*ListNode
 
 func (pq PriorityQueue) Len() int {
