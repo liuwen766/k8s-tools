@@ -1,10 +1,12 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
 	fmt.Println("滑动窗口算法")
-	s := "bcdedit"
+	s := "abcabcbb"
 	t := "dec"
 	fmt.Println(lengthOfLongestSubstring(s))
 	fmt.Println(findAnagrams(s, t))
@@ -15,7 +17,28 @@ func main() {
 // 1、无重复字符的最长子串
 // 给定一个字符串 s ，请你找出其中不含有重复字符的 最长子串 的长度。
 func lengthOfLongestSubstring(s string) int {
-	return -1
+	res := 0
+	left := 0
+	right := 0
+	windows := make(map[byte]int)
+	for right < len(s) {
+		c := s[right]
+		right++
+		windows[c]++
+
+		for windows[c] > 1 {
+			d := s[left]
+			left++
+			windows[d]--
+		}
+
+		if res > right-left {
+			res = res
+		} else {
+			res = right - left
+		}
+	}
+	return res
 }
 
 // 2、找到字符串中所有字母异位词

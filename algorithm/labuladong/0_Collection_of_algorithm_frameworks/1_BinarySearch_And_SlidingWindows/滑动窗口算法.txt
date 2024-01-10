@@ -1,5 +1,8 @@
 // 滑动窗口算法框架
+// ... ... 是需要更新的地方
 func slidingWindow(s string) {
+    // 一些初始化操作
+    ... ...
     // 用合适的数据结构记录窗口中的数据
     window := make(map[byte]int)
 
@@ -11,7 +14,7 @@ func slidingWindow(s string) {
         // 增大窗口
         right++
         // 进行窗口内数据的一系列更新
-
+        ... ...
         /*** debug 输出的位置 ***/
         // 注意在最终的解法代码中不要输出
         // 因为 IO 操作很耗时，可能导致超时
@@ -26,6 +29,7 @@ func slidingWindow(s string) {
             // 缩小窗口
             left++
             // 进行窗口内数据的一系列更新
+            ... ...
         }
     }
 }
