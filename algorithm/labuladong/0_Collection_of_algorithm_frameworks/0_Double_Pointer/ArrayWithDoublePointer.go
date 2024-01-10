@@ -109,10 +109,12 @@ func reverseString(s []byte) {
 
 // 6、最长回文子串
 func longestPalindrome(s string) string {
+	// todo
 	return ""
 }
 
 // 7、删除排序链表中的重复元素
 func deleteDuplicates(head *ListNode) *ListNode {
+	// todo
 	return head
 }
