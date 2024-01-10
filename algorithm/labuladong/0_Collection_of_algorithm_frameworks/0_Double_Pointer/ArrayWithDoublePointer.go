@@ -108,13 +108,55 @@ func reverseString(s []byte) {
 }
 
 // 6、最长回文子串
+// 如果字符串的反序与原始字符串相同，则该字符串称为回文字符串。
 func longestPalindrome(s string) string {
-	// todo
-	return ""
+	res := ""
+	for i := 0; i < len(s); i++ {
+
+		s1 := getMaxLen(s, i, i)
+		s2 := getMaxLen(s, i, i+1)
+
+		if len(res) > len(s1) {
+			res = res
+		} else {
+			res = s1
+		}
+
+		if len(res) > len(s2) {
+			res = res
+		} else {
+			res = s2
+		}
+
+	}
+	return res
+}
+
+func getMaxLen(s string, left int, right int) string {
+	for left >= 0 && right <= len(s)-1 && s[left] == s[right] {
+		left--
+		right++
+	}
+	return s[left+1 : right]
 }
 
 // 7、删除排序链表中的重复元素
 func deleteDuplicates(head *ListNode) *ListNode {
-	// todo
+
+	// ☆ 注意边界条件
+	if head == nil {
+		return nil
+	}
+
+	slow := head
+	fast := head
+	for fast != nil {
+		if slow.Val != fast.Val {
+			slow.Next = fast
+			slow = slow.Next
+		}
+		fast = fast.Next
+	}
+	slow.Next = nil
 	return head
 }
