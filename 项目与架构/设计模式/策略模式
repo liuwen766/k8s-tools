@@ -20,3 +20,62 @@
 
 在实际应用中，随着功能和体验的不断增长，我们需要经常添加 / 修改策略，这样就需要不断修改已有代码，不仅会让这个函数越来越难维护，
 还可能因为修改带来一些 bug。所以为了解耦，需要使用策略模式，定义一些独立的类来封装不同的算法，每一个类封装一个具体的算法（即策略）。
+
+
+// 比如，针对不同的事件等级进行告警，发邮件、发短信、打电话等等
+// 这种通过 if … else … 的形式来调用不同的告警方式，称之为硬编码。
+func Alert(EventType){
+   if EventType == "1"{
+      发邮件
+   }else if EventType == "2"{
+      发短信
+   }else if EventType == "3"{
+      打电话
+  }
+}
+
+可以定义策略接口 IStrategy，还定义了 email、message、phone 等告警策略。然后定义了一个策略执行者，可以设置不同的策略，
+这时我们可以随意更换策略，而不影响 Operator 的所有实现。
+
+// 策略模式实现
+// 定义一个策略类
+type IStrategy interface {
+	do(EventType)
+}
+--------------------------
+// 策略实现：一、发邮件逻辑
+type email struct{}
+
+func (*email) do(EventType)  {
+	//发邮件逻辑
+}
+--------------------------
+// 策略实现：二、发短信逻辑
+type message struct{}
+
+func (*message) do(EventType) {
+	//发短信逻辑
+}
+--------------------------
+// 策略实现：三、打电话逻辑
+type phone struct{}
+
+func (*phone) do(EventType) {
+	//打电话逻辑
+}
+--------------------------
+// 具体策略的执行者
+type Operator struct {
+	strategy IStrategy
+}
+
+// 设置策略
+func (operator *Operator) setStrategy(strategy IStrategy) {
+	operator.strategy = strategy
+}
+
+// 调用策略中的方法
+func (operator *Operator) calculate(EventType) int {
+	return operator.strategy.do(EventType)
+}
+
