@@ -13,8 +13,20 @@ type ListNode struct {
 }
 
 // 1、反转链表1
-func reverseList(head *ListNode) *ListNode {
-	return head
+func reverseList1(head *ListNode) *ListNode {
+	var pre *ListNode
+	return pre
+}
+
+// 递归解法
+func reverseList2(head *ListNode) *ListNode {
+	if head == nil || head.Next == nil {
+		return head
+	}
+	last := reverseList1(head.Next)
+	head.Next.Next = head
+	head.Next = nil
+	return last
 }
 
 // 2、反转链表——反转链表的前n个节点
