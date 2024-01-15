@@ -6,6 +6,14 @@ func main() {
 	fmt.Println("动态规划解题思路：明确 base case -> 明确「状态」-> 明确「选择」 -> 定义 dp 数组/函数的含义")
 }
 
+/*
+下面通过 斐波那契数列问题 和 凑零钱问题 来详解动态规划的基本原理。
+前者主要是让你明白什么是重叠子问题，
+后者主要举集中于如何列出状态转移方程。
+*/
+
+//-----------------斐波那契数列问题--------------------
+
 // 1、斐波那契数解法1——暴力递归
 func fib1(n int) int {
 	if n == 0 || n == 1 {
@@ -31,7 +39,7 @@ func bib2withBak(bak []int, n int) int {
 	return bib2withBak(bak, n-1) + bib2withBak(bak, n-2)
 }
 
-// 1、斐波那契数解法3——带备忘录的迭代解法
+// 1、斐波那契数解法3——带备忘录的迭代解法——空间复杂度O(n)
 func fib3(n int) int {
 	if n == 0 || n == 1 {
 		return n
@@ -43,4 +51,25 @@ func fib3(n int) int {
 		dp[i] = dp[i-1] + dp[i-2]
 	}
 	return dp[n]
+}
+
+// 1、斐波那契数解法4——迭代解法——空间复杂度O(1)
+func fib4(n int) int {
+	if n == 0 || n == 1 {
+		return n
+	}
+	dp1 := 0
+	dp2 := 1
+	for i := 2; i <= n; i++ {
+		dpi := dp1 + dp2
+		dp1 = dp2
+		dp2 = dpi
+	}
+	return dp2
+}
+
+//--------------------凑零钱问题-------------------------
+
+func coinChange(coins []int, amount int) int {
+	return -1
 }
