@@ -114,6 +114,6 @@ func getMin(a int, b int) int {
 
 // 带有备忘录的解法
 func coinChange2(coins []int, amount int) int {
-	meme := make([]int, amount+1)
-	return meme[0]
+	// todo
+	return -1
 }
