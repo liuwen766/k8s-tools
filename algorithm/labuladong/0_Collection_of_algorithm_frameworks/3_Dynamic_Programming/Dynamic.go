@@ -1,9 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math"
+)
 
 func main() {
 	fmt.Println("动态规划解题思路：明确 base case -> 明确「状态」-> 明确「选择」 -> 定义 dp 数组/函数的含义")
+	fmt.Println("斐波那契数:", fib1(15))
+	fmt.Println("凑零钱问题:", coinChange1([]int{1, 2, 5}, 16))
 }
 
 /*
@@ -70,6 +75,45 @@ func fib4(n int) int {
 
 //--------------------凑零钱问题-------------------------
 
-func coinChange(coins []int, amount int) int {
-	return -1
+func coinChange1(coins []int, amount int) int {
+	return dp(coins, amount)
+}
+
+// 该解法会超时
+func dp(coins []int, amount int) int {
+	if amount < 0 {
+		return -1
+	}
+	if amount == 0 {
+		return 0
+	}
+
+	res := math.MaxInt32
+
+	for i := range coins {
+		subProblem := dp(coins, amount-coins[i])
+		if subProblem == -1 {
+			continue
+		}
+		res = getMin(res, subProblem+1)
+	}
+
+	if res == math.MaxInt32 {
+		return -1
+	}
+
+	return res
+}
+
+func getMin(a int, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+// 带有备忘录的解法
+func coinChange2(coins []int, amount int) int {
+	meme := make([]int, amount+1)
+	return meme[0]
 }
